@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSlidingDoor } from "@/lib/stores/useSlidingDoor";
 import { GameCanvas } from "./GameCanvas";
 
 export const GameOnly: React.FC = () => {
-  const { gamePhase } = useSlidingDoor();
+  const { gamePhase, setGamePhase } = useSlidingDoor();
+
+  // Automatically set game phase to "ready" on mount for iframe use
+  useEffect(() => {
+    if (gamePhase === "settings") {
+      setGamePhase("ready");
+    }
+  }, [gamePhase, setGamePhase]);
 
   // Always show the game interface (no settings)
   return (

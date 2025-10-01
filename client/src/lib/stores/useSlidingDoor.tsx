@@ -66,8 +66,8 @@ export const difficultyPresets = {
 };
 
 const defaultSettings: GameSettings = {
-  houseImageUrl: "/images/house.jpg",
-  doorImageUrl: "/images/door.jpg",
+  houseImageUrl: "/door-fit-game/images/house.jpg",
+  doorImageUrl: "/door-fit-game/images/door.jpg",
   houseWidth: 600,
   houseHeight: 400,
   doorWidth: 80,

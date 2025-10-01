@@ -47,8 +47,8 @@ export const GameCanvas: React.FC = () => {
 
   // Initialize sounds
   useEffect(() => {
-    const hitAudio = new Audio("/sounds/hit.mp3");
-    const successAudio = new Audio("/sounds/success.mp3");
+    const hitAudio = new Audio("/door-fit-game/sounds/hit.mp3");
+    const successAudio = new Audio("/door-fit-game/sounds/success.mp3");
     
     hitAudio.preload = 'auto';
     successAudio.preload = 'auto';
