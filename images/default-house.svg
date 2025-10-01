@@ -1,0 +1,32 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky background -->
+  <rect width="600" height="400" fill="#87CEEB"/>
+  
+  <!-- Ground -->
+  <rect x="0" y="350" width="600" height="50" fill="#90EE90"/>
+  
+  <!-- House walls -->
+  <rect x="100" y="200" width="400" height="150" fill="#DEB887" stroke="#8B7355" stroke-width="2"/>
+  
+  <!-- Roof -->
+  <polygon points="80,200 300,120 520,200" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Door frame (where the sliding door will go) -->
+  <rect x="225" y="250" width="150" height="100" fill="#2F4F4F" stroke="#1C1C1C" stroke-width="2"/>
+  
+  <!-- Windows -->
+  <rect x="130" y="230" width="60" height="60" fill="#87CEFA" stroke="#4682B4" stroke-width="2"/>
+  <rect x="410" y="230" width="60" height="60" fill="#87CEFA" stroke="#4682B4" stroke-width="2"/>
+  
+  <!-- Window frames -->
+  <line x1="160" y1="230" x2="160" y2="290" stroke="#4682B4" stroke-width="1"/>
+  <line x1="130" y1="260" x2="190" y2="260" stroke="#4682B4" stroke-width="1"/>
+  <line x1="440" y1="230" x2="440" y2="290" stroke="#4682B4" stroke-width="1"/>
+  <line x1="410" y1="260" x2="470" y2="260" stroke="#4682B4" stroke-width="1"/>
+  
+  <!-- Chimney -->
+  <rect x="380" y="140" width="30" height="80" fill="#8B4513" stroke="#654321" stroke-width="2"/>
+  
+  <!-- Door frame text -->
+  <text x="300" y="240" text-anchor="middle" font-family="Arial" font-size="12" fill="#FFF">Door Area</text>
+</svg>
