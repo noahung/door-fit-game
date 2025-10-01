@@ -49,13 +49,7 @@ export const GameSettings: React.FC = () => {
     });
   };
 
-  const handleSaveAndPlay = () => {
-    if (!settings.houseImageUrl || !settings.doorImageUrl) {
-      alert("Please upload both house and door images before playing!");
-      return;
-    }
-    setGamePhase("ready");
-  };
+  // Settings are hardcoded in the store, so no need to save
 
   const iframeCode = `<iframe src="https://noahung.github.io/door-fit-game/#/game" width="800" height="600" frameborder="0" style="border: none; border-radius: 8px;"></iframe>`;
 
@@ -204,7 +198,7 @@ export const GameSettings: React.FC = () => {
             Game Configuration
           </CardTitle>
           <CardDescription>
-            Upload images and configure the sliding door game settings
+            Game settings reference - Click "Get Iframe Code" below to embed the game on your website
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -560,10 +554,10 @@ export const GameSettings: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="pt-4">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="lg" className="flex-1">
+                <Button size="lg" className="w-full bg-[#f47421] hover:bg-[#e56610]">
                   <Code className="w-4 h-4 mr-2" />
                   Get Iframe Code
                 </Button>
@@ -609,10 +603,6 @@ export const GameSettings: React.FC = () => {
                 </div>
               </DialogContent>
             </Dialog>
-            
-            <Button onClick={handleSaveAndPlay} size="lg" className="flex-1 bg-[#f47421] hover:bg-[#e56610]">
-              Save & Play Game
-            </Button>
           </div>
         </CardContent>
       </Card>
