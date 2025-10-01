@@ -1,15 +1,11 @@
 import React from "react";
 import { useSlidingDoor } from "@/lib/stores/useSlidingDoor";
 import { GameCanvas } from "./GameCanvas";
-import { GameSettings } from "./GameSettings";
 
-export const SlidingDoorGame: React.FC = () => {
-  const { gamePhase, setGamePhase } = useSlidingDoor();
+export const GameOnly: React.FC = () => {
+  const { gamePhase } = useSlidingDoor();
 
-  if (gamePhase === "settings") {
-    return <GameSettings />;
-  }
-
+  // Always show the game interface (no settings)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-6xl mx-auto">

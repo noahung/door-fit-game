@@ -516,9 +516,9 @@ export const GameCanvas: React.FC = () => {
             <Button
               size="lg"
               onClick={handleStart}
-              className="text-xl px-8 py-6"
+              className="text-xl px-8 py-6 bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg border-2 border-green-400 transition-all duration-200 transform hover:scale-105"
             >
-              Start Game
+              🚪 Start Game
             </Button>
           </div>
         )}
@@ -531,8 +531,11 @@ export const GameCanvas: React.FC = () => {
               <div className="text-white text-sm">Redirecting...</div>
             )}
             {!settings.successRedirectUrl && (
-              <Button onClick={resetGame} className="mt-4">
-                Play Again
+              <Button 
+                onClick={resetGame} 
+                className="mt-4 bg-white hover:bg-gray-100 text-green-600 font-bold px-6 py-2 border-2 border-white shadow-lg transition-all duration-200"
+              >
+                🎮 Play Again
               </Button>
             )}
           </div>
@@ -542,8 +545,11 @@ export const GameCanvas: React.FC = () => {
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500 bg-opacity-80">
             <div className="text-white text-4xl font-bold mb-4">TRY AGAIN!</div>
             <div className="text-white text-xl mb-4">Door not aligned correctly</div>
-            <Button onClick={resetGame} className="mt-4">
-              Retry
+            <Button 
+              onClick={resetGame} 
+              className="mt-4 bg-white hover:bg-gray-100 text-red-600 font-bold px-6 py-2 border-2 border-white shadow-lg transition-all duration-200"
+            >
+              🔄 Try Again
             </Button>
           </div>
         )}
