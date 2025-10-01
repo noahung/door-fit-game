@@ -22,12 +22,20 @@ export interface GameSettings {
 
 export type GamePhase = "settings" | "ready" | "playing" | "success" | "failure";
 
+interface GameStats {
+  attempts: number;
+  successes: number;
+  bestTime: number | null; // in milliseconds
+  currentStartTime: number | null;
+}
+
 interface SlidingDoorState {
   settings: GameSettings;
   gamePhase: GamePhase;
   doorPosition: number;
   doorDirection: 1 | -1;
   animationId: number | null;
+  stats: GameStats;
   
   // Actions
   updateSettings: (settings: Partial<GameSettings>) => void;
@@ -36,6 +44,10 @@ interface SlidingDoorState {
   setDoorDirection: (direction: 1 | -1) => void;
   setAnimationId: (id: number | null) => void;
   resetGame: () => void;
+  startAttempt: () => void;
+  recordSuccess: () => void;
+  recordFailure: () => void;
+  resetStats: () => void;
   uploadHouseImage: (file: File) => Promise<void>;
   uploadDoorImage: (file: File) => Promise<void>;
 }
@@ -82,6 +94,12 @@ export const useSlidingDoor = create<SlidingDoorState>()(
       doorPosition: 0,
       doorDirection: 1,
       animationId: null,
+      stats: {
+        attempts: 0,
+        successes: 0,
+        bestTime: null,
+        currentStartTime: null,
+      },
 
       updateSettings: (newSettings) => {
         console.log("Updating settings:", newSettings);
@@ -120,6 +138,63 @@ export const useSlidingDoor = create<SlidingDoorState>()(
         });
       },
 
+      startAttempt: () => {
+        set((state) => ({
+          stats: {
+            ...state.stats,
+            currentStartTime: Date.now(),
+          },
+        }));
+        console.log("Attempt started");
+      },
+
+      recordSuccess: () => {
+        const { stats } = get();
+        const currentTime = Date.now();
+        const elapsedTime = stats.currentStartTime 
+          ? currentTime - stats.currentStartTime 
+          : 0;
+        
+        const newBestTime = stats.bestTime === null 
+          ? elapsedTime 
+          : Math.min(stats.bestTime, elapsedTime);
+
+        set((state) => ({
+          stats: {
+            ...state.stats,
+            attempts: state.stats.attempts + 1,
+            successes: state.stats.successes + 1,
+            bestTime: newBestTime,
+            currentStartTime: null,
+          },
+        }));
+        
+        console.log(`Success! Time: ${elapsedTime}ms, Best: ${newBestTime}ms`);
+      },
+
+      recordFailure: () => {
+        set((state) => ({
+          stats: {
+            ...state.stats,
+            attempts: state.stats.attempts + 1,
+            currentStartTime: null,
+          },
+        }));
+        console.log("Failure recorded");
+      },
+
+      resetStats: () => {
+        set({
+          stats: {
+            attempts: 0,
+            successes: 0,
+            bestTime: null,
+            currentStartTime: null,
+          },
+        });
+        console.log("Stats reset");
+      },
+
       uploadHouseImage: async (file) => {
         try {
           const base64 = await fileToBase64(file);
@@ -152,21 +227,32 @@ export const useSlidingDoor = create<SlidingDoorState>()(
     }),
     {
       name: "sliding-door-storage",
-      partialize: (state) => ({ settings: state.settings }),
+      partialize: (state) => ({ settings: state.settings, stats: state.stats }),
       migrate: (persistedState: any) => {
         // Ensure difficulty is always set for legacy storage
+        const result: any = {};
+        
         if (persistedState?.settings) {
           const s = persistedState.settings;
-          return {
-            settings: {
-              ...s,
-              difficulty: s.difficulty ?? "medium",
-              doorSpeed: s.doorSpeed ?? 3,
-              successThreshold: s.successThreshold ?? 80,
-            },
+          result.settings = {
+            ...s,
+            difficulty: s.difficulty ?? "medium",
+            doorSpeed: s.doorSpeed ?? 3,
+            successThreshold: s.successThreshold ?? 80,
           };
         }
-        return persistedState;
+        
+        // Migrate stats with defaults
+        if (persistedState?.stats) {
+          result.stats = {
+            attempts: persistedState.stats.attempts ?? 0,
+            successes: persistedState.stats.successes ?? 0,
+            bestTime: persistedState.stats.bestTime ?? null,
+            currentStartTime: null, // Never persist currentStartTime
+          };
+        }
+        
+        return result;
       },
     }
   )

@@ -15,11 +15,16 @@ export const GameCanvas: React.FC = () => {
     gamePhase,
     doorPosition,
     doorDirection,
+    stats,
     setDoorPosition,
     setDoorDirection,
     setGamePhase,
     resetGame,
     setAnimationId,
+    startAttempt,
+    recordSuccess,
+    recordFailure,
+    resetStats,
   } = useSlidingDoor();
 
   const {
@@ -271,6 +276,7 @@ export const GameCanvas: React.FC = () => {
       if (isSuccess) {
         console.log("Success! Door aligned correctly");
         playSuccess();
+        recordSuccess();
         setGamePhase("success");
         
         // Redirect after a delay
@@ -282,6 +288,7 @@ export const GameCanvas: React.FC = () => {
       } else {
         console.log("Failure! Door not aligned");
         playHit();
+        recordFailure();
         setGamePhase("failure");
       }
     }
@@ -292,6 +299,7 @@ export const GameCanvas: React.FC = () => {
     console.log("Starting game");
     setDoorPosition(0);
     setDoorDirection(1);
+    startAttempt();
     setGamePhase("playing");
   };
 
@@ -361,6 +369,47 @@ export const GameCanvas: React.FC = () => {
           </p>
         </div>
       )}
+      
+      {/* Stats Display */}
+      <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold text-gray-800">Game Statistics</h3>
+          {stats.attempts > 0 && (
+            <Button
+              onClick={() => {
+                if (window.confirm("Reset all statistics? This cannot be undone.")) {
+                  resetStats();
+                }
+              }}
+              variant="outline"
+              size="sm"
+            >
+              Reset Stats
+            </Button>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="text-sm text-gray-600">Attempts</p>
+            <p className="text-2xl font-bold text-blue-600">{stats.attempts}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Successes</p>
+            <p className="text-2xl font-bold text-green-600">{stats.successes}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Best Time</p>
+            <p className="text-2xl font-bold text-purple-600">
+              {stats.bestTime !== null ? `${(stats.bestTime / 1000).toFixed(2)}s` : "-"}
+            </p>
+          </div>
+        </div>
+        {stats.attempts > 0 && (
+          <div className="mt-3 text-center text-sm text-gray-600">
+            Success Rate: {((stats.successes / stats.attempts) * 100).toFixed(1)}%
+          </div>
+        )}
+      </div>
     </div>
   );
 };
