@@ -1,0 +1,147 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+export interface GameSettings {
+  houseImageUrl: string | null;
+  doorImageUrl: string | null;
+  houseWidth: number;
+  houseHeight: number;
+  doorWidth: number;
+  doorHeight: number;
+  successAreaX: number;
+  successAreaY: number;
+  successAreaWidth: number;
+  successAreaHeight: number;
+  doorSpeed: number;
+  successRedirectUrl: string;
+  successThreshold: number; // Percentage of overlap required for success (0-100)
+}
+
+export type GamePhase = "settings" | "ready" | "playing" | "success" | "failure";
+
+interface SlidingDoorState {
+  settings: GameSettings;
+  gamePhase: GamePhase;
+  doorPosition: number;
+  doorDirection: 1 | -1;
+  animationId: number | null;
+  
+  // Actions
+  updateSettings: (settings: Partial<GameSettings>) => void;
+  setGamePhase: (phase: GamePhase) => void;
+  setDoorPosition: (position: number) => void;
+  setDoorDirection: (direction: 1 | -1) => void;
+  setAnimationId: (id: number | null) => void;
+  resetGame: () => void;
+  uploadHouseImage: (file: File) => Promise<void>;
+  uploadDoorImage: (file: File) => Promise<void>;
+}
+
+const defaultSettings: GameSettings = {
+  houseImageUrl: null,
+  doorImageUrl: null,
+  houseWidth: 600,
+  houseHeight: 400,
+  doorWidth: 150,
+  doorHeight: 200,
+  successAreaX: 225,
+  successAreaY: 150,
+  successAreaWidth: 150,
+  successAreaHeight: 200,
+  doorSpeed: 2,
+  successRedirectUrl: "",
+  successThreshold: 80,
+};
+
+// Helper function to convert file to base64
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+};
+
+export const useSlidingDoor = create<SlidingDoorState>()(
+  persist(
+    (set, get) => ({
+      settings: defaultSettings,
+      gamePhase: "settings",
+      doorPosition: 0,
+      doorDirection: 1,
+      animationId: null,
+
+      updateSettings: (newSettings) => {
+        console.log("Updating settings:", newSettings);
+        set((state) => ({
+          settings: { ...state.settings, ...newSettings },
+        }));
+      },
+
+      setGamePhase: (phase) => {
+        console.log("Game phase changed to:", phase);
+        set({ gamePhase: phase });
+      },
+
+      setDoorPosition: (position) => {
+        set({ doorPosition: position });
+      },
+
+      setDoorDirection: (direction) => {
+        set({ doorDirection: direction });
+      },
+
+      setAnimationId: (id) => {
+        set({ animationId: id });
+      },
+
+      resetGame: () => {
+        const { animationId } = get();
+        if (animationId !== null) {
+          cancelAnimationFrame(animationId);
+        }
+        set({
+          gamePhase: "ready",
+          doorPosition: 0,
+          doorDirection: 1,
+          animationId: null,
+        });
+      },
+
+      uploadHouseImage: async (file) => {
+        try {
+          const base64 = await fileToBase64(file);
+          set((state) => ({
+            settings: {
+              ...state.settings,
+              houseImageUrl: base64,
+            },
+          }));
+          console.log("House image uploaded successfully");
+        } catch (error) {
+          console.error("Error uploading house image:", error);
+        }
+      },
+
+      uploadDoorImage: async (file) => {
+        try {
+          const base64 = await fileToBase64(file);
+          set((state) => ({
+            settings: {
+              ...state.settings,
+              doorImageUrl: base64,
+            },
+          }));
+          console.log("Door image uploaded successfully");
+        } catch (error) {
+          console.error("Error uploading door image:", error);
+        }
+      },
+    }),
+    {
+      name: "sliding-door-storage",
+      partialize: (state) => ({ settings: state.settings }),
+    }
+  )
+);
