@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Upload, Settings as SettingsIcon } from "lucide-react";
+import { Upload, Settings as SettingsIcon, Code, Copy, Check } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const GameSettings: React.FC = () => {
   const houseInputRef = useRef<HTMLInputElement>(null);
@@ -15,6 +16,7 @@ export const GameSettings: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [copied, setCopied] = useState(false);
   
   const {
     settings,
@@ -53,6 +55,15 @@ export const GameSettings: React.FC = () => {
       return;
     }
     setGamePhase("ready");
+  };
+
+  const iframeCode = `<iframe src="https://noahung.github.io/door-fit-game/#/game" width="800" height="600" frameborder="0" style="border: none; border-radius: 8px;"></iframe>`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(iframeCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   // Draw preview canvas
@@ -550,7 +561,56 @@ export const GameSettings: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
-            <Button onClick={handleSaveAndPlay} size="lg" className="flex-1">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="lg" className="flex-1">
+                  <Code className="w-4 h-4 mr-2" />
+                  Get Iframe Code
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Embed Game on Your Website</DialogTitle>
+                  <DialogDescription>
+                    Copy this iframe code and paste it into your WordPress page or any website.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <code className="text-sm text-gray-800 break-all">
+                      {iframeCode}
+                    </code>
+                  </div>
+                  <Button
+                    onClick={copyToClipboard}
+                    className="w-full"
+                    variant={copied ? "default" : "outline"}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy to Clipboard
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <p><strong>Note:</strong> You can customize the width and height in the iframe code:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li><code>width="800"</code> - adjust the width in pixels</li>
+                      <li><code>height="600"</code> - adjust the height in pixels</li>
+                      <li>Or use <code>width="100%"</code> for responsive width</li>
+                    </ul>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Button onClick={handleSaveAndPlay} size="lg" className="flex-1 bg-[#f47421] hover:bg-[#e56610]">
               Save & Play Game
             </Button>
           </div>
