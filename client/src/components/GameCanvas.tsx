@@ -9,6 +9,15 @@ export const GameCanvas: React.FC = () => {
   const houseImageRef = useRef<HTMLImageElement | null>(null);
   const doorImageRef = useRef<HTMLImageElement | null>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [particles, setParticles] = useState<Array<{
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    color: string;
+    size: number;
+    life: number;
+  }>>([]);
 
   const {
     settings,
@@ -270,6 +279,48 @@ export const GameCanvas: React.FC = () => {
     }
   };
 
+  // Create particles
+  const createParticles = (color: string, count: number = 50) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    
+    const newParticles = Array.from({ length: count }, () => ({
+      x: centerX,
+      y: centerY,
+      vx: (Math.random() - 0.5) * 10,
+      vy: (Math.random() - 0.5) * 10,
+      color,
+      size: Math.random() * 6 + 2,
+      life: 1.0,
+    }));
+    
+    setParticles(newParticles);
+  };
+
+  // Animate particles
+  useEffect(() => {
+    if (particles.length === 0) return;
+    
+    const animationId = requestAnimationFrame(() => {
+      setParticles(prev => 
+        prev
+          .map(p => ({
+            ...p,
+            x: p.x + p.vx,
+            y: p.y + p.vy,
+            vy: p.vy + 0.3, // gravity
+            life: p.life - 0.02,
+          }))
+          .filter(p => p.life > 0)
+      );
+    });
+    
+    return () => cancelAnimationFrame(animationId);
+  }, [particles]);
+
   // Initial draw when not playing
   useEffect(() => {
     if (gamePhase !== "playing" && imagesLoaded) {
@@ -280,6 +331,26 @@ export const GameCanvas: React.FC = () => {
       drawScene(ctx);
     }
   }, [gamePhase, imagesLoaded, settings]);
+
+  // Draw particles
+  useEffect(() => {
+    if (particles.length === 0) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+  }, [particles]);
 
   // Check if door is in success area
   const checkSuccess = () => {
@@ -309,6 +380,7 @@ export const GameCanvas: React.FC = () => {
         console.log("Success! Door aligned correctly");
         playSuccess();
         recordSuccess();
+        createParticles("#00ff00", 60); // Green particles for success
         
         // Check game mode behavior
         if (settings.gameMode === "timed") {
@@ -353,6 +425,7 @@ export const GameCanvas: React.FC = () => {
         console.log("Failure! Door not aligned");
         playHit();
         recordFailure();
+        createParticles("#ff0000", 40); // Red particles for failure
         
         // Check game mode behavior
         if (settings.gameMode === "timed") {

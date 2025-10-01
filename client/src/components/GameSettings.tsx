@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useSlidingDoor, difficultyPresets, DifficultyLevel, GameMode } from "@/lib/stores/useSlidingDoor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 export const GameSettings: React.FC = () => {
   const houseInputRef = useRef<HTMLInputElement>(null);
   const doorInputRef = useRef<HTMLInputElement>(null);
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   
   const {
     settings,
@@ -51,6 +55,135 @@ export const GameSettings: React.FC = () => {
     setGamePhase("ready");
   };
 
+  // Draw preview canvas
+  useEffect(() => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw house if available
+    if (settings.houseImageUrl) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, settings.houseWidth, settings.houseHeight);
+        drawSuccessArea(ctx);
+      };
+      img.src = settings.houseImageUrl;
+    } else {
+      // Draw placeholder
+      ctx.fillStyle = "#e0e0e0";
+      ctx.fillRect(0, 0, settings.houseWidth, settings.houseHeight);
+      ctx.fillStyle = "#666";
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Upload house image", settings.houseWidth / 2, settings.houseHeight / 2);
+      drawSuccessArea(ctx);
+    }
+  }, [settings.houseImageUrl, settings.houseWidth, settings.houseHeight, settings.successAreaX, settings.successAreaY, settings.successAreaWidth, settings.successAreaHeight]);
+
+  const drawSuccessArea = (ctx: CanvasRenderingContext2D) => {
+    // Draw success area
+    ctx.strokeStyle = "#00ff00";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(settings.successAreaX, settings.successAreaY, settings.successAreaWidth, settings.successAreaHeight);
+    ctx.setLineDash([]);
+    
+    // Draw resize handle
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(
+      settings.successAreaX + settings.successAreaWidth - 8,
+      settings.successAreaY + settings.successAreaHeight - 8,
+      16,
+      16
+    );
+    
+    // Draw door outline
+    const doorY = settings.successAreaY + (settings.successAreaHeight - settings.doorHeight) / 2;
+    ctx.strokeStyle = "#ff6600";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(settings.successAreaX + 10, doorY, settings.doorWidth, settings.doorHeight);
+    
+    // Label
+    ctx.fillStyle = "#00ff00";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("Success Area (drag to move, bottom-right to resize)", settings.successAreaX, settings.successAreaY - 5);
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Check if clicking resize handle
+    const handleX = settings.successAreaX + settings.successAreaWidth;
+    const handleY = settings.successAreaY + settings.successAreaHeight;
+    
+    if (x >= handleX - 8 && x <= handleX + 8 && y >= handleY - 8 && y <= handleY + 8) {
+      setIsResizing(true);
+      setDragStart({ x, y });
+    }
+    // Check if clicking inside success area
+    else if (
+      x >= settings.successAreaX && x <= settings.successAreaX + settings.successAreaWidth &&
+      y >= settings.successAreaY && y <= settings.successAreaY + settings.successAreaHeight
+    ) {
+      setIsDragging(true);
+      setDragStart({
+        x: x - settings.successAreaX,
+        y: y - settings.successAreaY
+      });
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = previewCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    if (isDragging) {
+      const newX = Math.max(0, Math.min(x - dragStart.x, settings.houseWidth - settings.successAreaWidth));
+      const newY = Math.max(0, Math.min(y - dragStart.y, settings.houseHeight - settings.successAreaHeight));
+      updateSettings({ successAreaX: Math.round(newX), successAreaY: Math.round(newY) });
+    } else if (isResizing) {
+      const newWidth = Math.max(50, Math.min(x - settings.successAreaX, settings.houseWidth - settings.successAreaX));
+      const newHeight = Math.max(50, Math.min(y - settings.successAreaY, settings.houseHeight - settings.successAreaY));
+      updateSettings({ successAreaWidth: Math.round(newWidth), successAreaHeight: Math.round(newHeight) });
+    }
+    
+    // Update cursor
+    const handleX = settings.successAreaX + settings.successAreaWidth;
+    const handleY = settings.successAreaY + settings.successAreaHeight;
+    
+    if (x >= handleX - 8 && x <= handleX + 8 && y >= handleY - 8 && y <= handleY + 8) {
+      canvas.style.cursor = "nwse-resize";
+    } else if (
+      x >= settings.successAreaX && x <= settings.successAreaX + settings.successAreaWidth &&
+      y >= settings.successAreaY && y <= settings.successAreaY + settings.successAreaHeight
+    ) {
+      canvas.style.cursor = "move";
+    } else {
+      canvas.style.cursor = "default";
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    setIsDragging(false);
+    setIsResizing(false);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <Card>
@@ -64,6 +197,29 @@ export const GameSettings: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Visual Editor Preview */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold">Visual Editor - Position Success Area</h3>
+            <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-50">
+              <canvas
+                ref={previewCanvasRef}
+                width={settings.houseWidth}
+                height={settings.houseHeight}
+                onMouseDown={handleCanvasMouseDown}
+                onMouseMove={handleCanvasMouseMove}
+                onMouseUp={handleCanvasMouseUp}
+                onMouseLeave={handleCanvasMouseUp}
+                className="max-w-full h-auto cursor-default"
+                style={{ display: "block", margin: "0 auto" }}
+              />
+            </div>
+            <p className="text-sm text-gray-600">
+              • Drag the green area to reposition<br/>
+              • Drag the bottom-right corner to resize<br/>
+              • Orange outline shows door size
+            </p>
+          </div>
+
           {/* Image Uploads */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-3">
