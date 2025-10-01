@@ -66,16 +66,16 @@ export const difficultyPresets = {
 };
 
 const defaultSettings: GameSettings = {
-  houseImageUrl: null,
-  doorImageUrl: null,
+  houseImageUrl: "/images/default-house.svg",
+  doorImageUrl: "/images/default-door.svg",
   houseWidth: 600,
   houseHeight: 400,
   doorWidth: 150,
-  doorHeight: 200,
+  doorHeight: 100,
   successAreaX: 225,
-  successAreaY: 150,
+  successAreaY: 250,
   successAreaWidth: 150,
-  successAreaHeight: 200,
+  successAreaHeight: 100,
   doorSpeed: 3,
   successRedirectUrl: "",
   successThreshold: 80,

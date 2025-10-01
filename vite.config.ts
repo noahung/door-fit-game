@@ -27,5 +27,5 @@ export default defineConfig({
     emptyOutDir: true,
   },
   // Add support for large models and audio files
-  assetsInclude: ["**/*.gltf", "**/*.glb", "**/*.mp3", "**/*.ogg", "**/*.wav"],
+  assetsInclude: ["**/*.gltf", "**/*.glb", "**/*.mp3", "**/*.ogg", "**/*.wav", "**/*.svg"],
 });
