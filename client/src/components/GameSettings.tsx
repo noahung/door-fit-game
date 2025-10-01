@@ -1,11 +1,12 @@
 import React, { useRef } from "react";
-import { useSlidingDoor } from "@/lib/stores/useSlidingDoor";
+import { useSlidingDoor, difficultyPresets, DifficultyLevel } from "@/lib/stores/useSlidingDoor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Upload, Settings as SettingsIcon } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export const GameSettings: React.FC = () => {
   const houseInputRef = useRef<HTMLInputElement>(null);
@@ -31,6 +32,15 @@ export const GameSettings: React.FC = () => {
     if (file) {
       uploadDoorImage(file);
     }
+  };
+
+  const handleDifficultyChange = (value: DifficultyLevel) => {
+    const preset = difficultyPresets[value];
+    updateSettings({
+      difficulty: value,
+      doorSpeed: preset.doorSpeed,
+      successThreshold: preset.successThreshold,
+    });
   };
 
   const handleSaveAndPlay = () => {
@@ -251,6 +261,33 @@ export const GameSettings: React.FC = () => {
           {/* Game Settings */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Game Settings</h3>
+            
+            <div className="space-y-3">
+              <Label>Difficulty Level</Label>
+              <RadioGroup
+                value={settings.difficulty}
+                onValueChange={(value) => handleDifficultyChange(value as DifficultyLevel)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="easy" id="easy" />
+                  <Label htmlFor="easy" className="font-normal cursor-pointer">
+                    Easy (Slower speed, 70% accuracy required)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="medium" id="medium" />
+                  <Label htmlFor="medium" className="font-normal cursor-pointer">
+                    Medium (Normal speed, 80% accuracy required)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="hard" id="hard" />
+                  <Label htmlFor="hard" className="font-normal cursor-pointer">
+                    Hard (Fast speed, 90% accuracy required)
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
             
             <div className="space-y-2">
               <Label htmlFor="door-speed">

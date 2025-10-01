@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type DifficultyLevel = "easy" | "medium" | "hard";
+
 export interface GameSettings {
   houseImageUrl: string | null;
   doorImageUrl: string | null;
@@ -15,6 +17,7 @@ export interface GameSettings {
   doorSpeed: number;
   successRedirectUrl: string;
   successThreshold: number; // Percentage of overlap required for success (0-100)
+  difficulty: DifficultyLevel;
 }
 
 export type GamePhase = "settings" | "ready" | "playing" | "success" | "failure";
@@ -37,6 +40,13 @@ interface SlidingDoorState {
   uploadDoorImage: (file: File) => Promise<void>;
 }
 
+// Difficulty presets
+export const difficultyPresets = {
+  easy: { doorSpeed: 1.5, successThreshold: 70 },
+  medium: { doorSpeed: 3, successThreshold: 80 },
+  hard: { doorSpeed: 5, successThreshold: 90 },
+};
+
 const defaultSettings: GameSettings = {
   houseImageUrl: null,
   doorImageUrl: null,
@@ -48,9 +58,10 @@ const defaultSettings: GameSettings = {
   successAreaY: 150,
   successAreaWidth: 150,
   successAreaHeight: 200,
-  doorSpeed: 2,
+  doorSpeed: 3,
   successRedirectUrl: "",
   successThreshold: 80,
+  difficulty: "medium",
 };
 
 // Helper function to convert file to base64
@@ -142,6 +153,21 @@ export const useSlidingDoor = create<SlidingDoorState>()(
     {
       name: "sliding-door-storage",
       partialize: (state) => ({ settings: state.settings }),
+      migrate: (persistedState: any) => {
+        // Ensure difficulty is always set for legacy storage
+        if (persistedState?.settings) {
+          const s = persistedState.settings;
+          return {
+            settings: {
+              ...s,
+              difficulty: s.difficulty ?? "medium",
+              doorSpeed: s.doorSpeed ?? 3,
+              successThreshold: s.successThreshold ?? 80,
+            },
+          };
+        }
+        return persistedState;
+      },
     }
   )
 );
