@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useSlidingDoor } from "@/lib/stores/useSlidingDoor";
+import { useAudio } from "@/lib/stores/useAudio";
 import { Button } from "@/components/ui/button";
+import { Volume2, VolumeX } from "lucide-react";
 
 export const GameCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,6 +21,31 @@ export const GameCanvas: React.FC = () => {
     resetGame,
     setAnimationId,
   } = useSlidingDoor();
+
+  const {
+    setHitSound,
+    setSuccessSound,
+    playHit,
+    playSuccess,
+    isMuted,
+    toggleMute,
+  } = useAudio();
+
+  // Initialize sounds
+  useEffect(() => {
+    const hitAudio = new Audio("/sounds/hit.mp3");
+    const successAudio = new Audio("/sounds/success.mp3");
+    
+    hitAudio.preload = 'auto';
+    successAudio.preload = 'auto';
+    hitAudio.load();
+    successAudio.load();
+    
+    setHitSound(hitAudio);
+    setSuccessSound(successAudio);
+    
+    console.log("Audio initialized");
+  }, [setHitSound, setSuccessSound]);
 
   // Load images
   useEffect(() => {
@@ -243,6 +270,7 @@ export const GameCanvas: React.FC = () => {
       
       if (isSuccess) {
         console.log("Success! Door aligned correctly");
+        playSuccess();
         setGamePhase("success");
         
         // Redirect after a delay
@@ -253,6 +281,7 @@ export const GameCanvas: React.FC = () => {
         }
       } else {
         console.log("Failure! Door not aligned");
+        playHit();
         setGamePhase("failure");
       }
     }
@@ -277,6 +306,15 @@ export const GameCanvas: React.FC = () => {
           className="border-4 border-gray-800 cursor-pointer touch-none shadow-2xl"
           style={{ maxWidth: "100%", height: "auto" }}
         />
+        
+        <Button
+          onClick={toggleMute}
+          variant="outline"
+          size="icon"
+          className="absolute top-4 right-4 bg-white/90 hover:bg-white z-10"
+        >
+          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </Button>
         
         {gamePhase === "ready" && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
