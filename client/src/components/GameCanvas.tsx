@@ -212,9 +212,9 @@ export const GameCanvas: React.FC = () => {
 
     // Draw success area (semi-transparent in playing mode)
     if (gamePhase === "playing" || gamePhase === "ready") {
-      ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
-      ctx.strokeStyle = "rgba(0, 255, 0, 0.5)";
-      ctx.lineWidth = 2;
+      ctx.fillStyle = "rgba(244, 116, 33, 0.2)"; // Orange with transparency
+      ctx.strokeStyle = "rgba(244, 116, 33, 0.6)"; // Orange border
+      ctx.lineWidth = 3;
       ctx.fillRect(
         settings.successAreaX,
         settings.successAreaY,
@@ -261,11 +261,11 @@ export const GameCanvas: React.FC = () => {
 
     // Draw feedback overlay for success/failure
     if (gamePhase === "success") {
-      ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
+      ctx.fillStyle = "rgba(244, 116, 33, 0.3)"; // Orange overlay
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Draw success border
-      ctx.strokeStyle = "#00ff00";
+      ctx.strokeStyle = "#f47421";
       ctx.lineWidth = 10;
       ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
     } else if (gamePhase === "failure") {
@@ -498,7 +498,7 @@ export const GameCanvas: React.FC = () => {
           width={settings.houseWidth}
           height={settings.houseHeight}
           onClick={handleCanvasClick}
-          className="border-4 border-gray-800 cursor-pointer touch-none shadow-2xl"
+          className="border-4 border-gray-200 rounded-2xl cursor-pointer touch-none shadow-2xl"
           style={{ maxWidth: "100%", height: "auto" }}
         />
         
@@ -506,9 +506,9 @@ export const GameCanvas: React.FC = () => {
           onClick={toggleMute}
           variant="outline"
           size="icon"
-          className="absolute top-4 right-4 bg-white/90 hover:bg-white z-10"
+          className="absolute top-4 right-4 bg-white/95 hover:bg-white rounded-xl border-2 border-gray-200 hover:border-[#f47421] z-10 shadow-lg transition-all"
         >
-          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          {isMuted ? <VolumeX className="w-4 h-4 text-gray-600" /> : <Volume2 className="w-4 h-4 text-[#f47421]" />}
         </Button>
         
         {gamePhase === "ready" && (
@@ -516,7 +516,7 @@ export const GameCanvas: React.FC = () => {
             <Button
               size="lg"
               onClick={handleStart}
-              className="text-xl px-8 py-6 bg-green-600 hover:bg-green-700 text-white font-bold shadow-lg border-2 border-green-400 transition-all duration-200 transform hover:scale-105"
+              className="text-xl px-8 py-6 bg-[#f47421] hover:bg-[#e56610] text-white font-bold shadow-xl rounded-2xl border-2 border-[#f47421] transition-all duration-200 transform hover:scale-105"
             >
               🚪 Start Game
             </Button>
@@ -524,7 +524,7 @@ export const GameCanvas: React.FC = () => {
         )}
         
         {gamePhase === "success" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-500 bg-opacity-80">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#f47421] bg-opacity-90 rounded-2xl">
             <div className="text-white text-4xl font-bold mb-4">SUCCESS!</div>
             <div className="text-white text-xl mb-4">Perfect alignment!</div>
             {settings.successRedirectUrl && (
@@ -533,7 +533,7 @@ export const GameCanvas: React.FC = () => {
             {!settings.successRedirectUrl && (
               <Button 
                 onClick={resetGame} 
-                className="mt-4 bg-white hover:bg-gray-100 text-green-600 font-bold px-6 py-2 border-2 border-white shadow-lg transition-all duration-200"
+                className="mt-4 bg-white hover:bg-gray-100 text-[#f47421] font-bold px-6 py-2 rounded-xl border-2 border-white shadow-lg transition-all duration-200"
               >
                 🎮 Play Again
               </Button>
@@ -542,12 +542,12 @@ export const GameCanvas: React.FC = () => {
         )}
         
         {gamePhase === "failure" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500 bg-opacity-80">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500 bg-opacity-90 rounded-2xl">
             <div className="text-white text-4xl font-bold mb-4">TRY AGAIN!</div>
             <div className="text-white text-xl mb-4">Door not aligned correctly</div>
             <Button 
               onClick={resetGame} 
-              className="mt-4 bg-white hover:bg-gray-100 text-red-600 font-bold px-6 py-2 border-2 border-white shadow-lg transition-all duration-200"
+              className="mt-4 bg-white hover:bg-gray-100 text-red-600 font-bold px-6 py-2 rounded-xl border-2 border-white shadow-lg transition-all duration-200"
             >
               🔄 Try Again
             </Button>
@@ -557,26 +557,26 @@ export const GameCanvas: React.FC = () => {
       
       {gamePhase === "playing" && (
         <div className="space-y-2 w-full max-w-md">
-          <div className="bg-blue-100 border border-blue-400 rounded px-4 py-3 text-center">
-            <p className="text-blue-800 font-semibold">
-              Click or tap to stop the door when it aligns with the green area!
+          <div className="bg-orange-50 border-2 border-[#f47421] rounded-xl px-4 py-3 text-center shadow-md">
+            <p className="text-[#f47421] font-semibold">
+              Click or tap to stop the door when it aligns with the target area!
             </p>
           </div>
           
           {/* Timed Mode Timer */}
           {settings.gameMode === "timed" && stats.timedModeTimeLeft !== null && (
-            <div className="bg-orange-100 border border-orange-400 rounded px-4 py-2 text-center">
-              <p className="text-orange-800 font-bold text-lg">
-                Time Left: {stats.timedModeTimeLeft}s
+            <div className="bg-orange-50 border-2 border-[#f47421] rounded-xl px-4 py-2 text-center shadow-md">
+              <p className="text-[#f47421] font-bold text-lg">
+                ⏱️ Time Left: {stats.timedModeTimeLeft}s
               </p>
             </div>
           )}
           
           {/* Limited Mode Attempts */}
           {settings.gameMode === "limited" && stats.limitedModeAttemptsLeft !== null && (
-            <div className="bg-purple-100 border border-purple-400 rounded px-4 py-2 text-center">
-              <p className="text-purple-800 font-bold text-lg">
-                Attempts Left: {stats.limitedModeAttemptsLeft}
+            <div className="bg-orange-50 border-2 border-[#f47421] rounded-xl px-4 py-2 text-center shadow-md">
+              <p className="text-[#f47421] font-bold text-lg">
+                🎯 Attempts Left: {stats.limitedModeAttemptsLeft}
               </p>
             </div>
           )}
@@ -584,9 +584,9 @@ export const GameCanvas: React.FC = () => {
       )}
       
       {/* Stats Display */}
-      <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-gray-800">Game Statistics</h3>
+      <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-800">📊 Game Statistics</h3>
           {stats.attempts > 0 && (
             <Button
               onClick={() => {
@@ -596,30 +596,35 @@ export const GameCanvas: React.FC = () => {
               }}
               variant="outline"
               size="sm"
+              className="rounded-lg border-[#f47421] text-[#f47421] hover:bg-orange-50"
             >
               Reset Stats
             </Button>
           )}
         </div>
         <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <p className="text-sm text-gray-600">Attempts</p>
+          <div className="bg-blue-50 rounded-xl p-3">
+            <p className="text-sm text-gray-600 mb-1">Attempts</p>
             <p className="text-2xl font-bold text-blue-600">{stats.attempts}</p>
           </div>
-          <div>
-            <p className="text-sm text-gray-600">Successes</p>
-            <p className="text-2xl font-bold text-green-600">{stats.successes}</p>
+          <div className="bg-orange-50 rounded-xl p-3">
+            <p className="text-sm text-gray-600 mb-1">Successes</p>
+            <p className="text-2xl font-bold text-[#f47421]">{stats.successes}</p>
           </div>
-          <div>
-            <p className="text-sm text-gray-600">Best Time</p>
+          <div className="bg-purple-50 rounded-xl p-3">
+            <p className="text-sm text-gray-600 mb-1">Best Time</p>
             <p className="text-2xl font-bold text-purple-600">
               {stats.bestTime !== null ? `${(stats.bestTime / 1000).toFixed(2)}s` : "-"}
             </p>
           </div>
         </div>
         {stats.attempts > 0 && (
-          <div className="mt-3 text-center text-sm text-gray-600">
-            Success Rate: {((stats.successes / stats.attempts) * 100).toFixed(1)}%
+          <div className="mt-4 text-center">
+            <div className="inline-block bg-gradient-to-r from-orange-50 to-blue-50 rounded-xl px-4 py-2">
+              <span className="text-sm font-semibold text-gray-700">
+                Success Rate: <span className="text-[#f47421] text-lg">{((stats.successes / stats.attempts) * 100).toFixed(1)}%</span>
+              </span>
+            </div>
           </div>
         )}
       </div>
