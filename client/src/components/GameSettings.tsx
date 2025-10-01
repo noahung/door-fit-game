@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useSlidingDoor, difficultyPresets, DifficultyLevel } from "@/lib/stores/useSlidingDoor";
+import { useSlidingDoor, difficultyPresets, DifficultyLevel, GameMode } from "@/lib/stores/useSlidingDoor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -261,6 +261,65 @@ export const GameSettings: React.FC = () => {
           {/* Game Settings */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Game Settings</h3>
+            
+            <div className="space-y-3">
+              <Label>Game Mode</Label>
+              <RadioGroup
+                value={settings.gameMode}
+                onValueChange={(value) => updateSettings({ gameMode: value as GameMode })}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="classic" id="classic" />
+                  <Label htmlFor="classic" className="font-normal cursor-pointer">
+                    Classic - Play freely with no time or attempt limits
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="timed" id="timed" />
+                  <Label htmlFor="timed" className="font-normal cursor-pointer">
+                    Timed Challenge - Score as many successes as possible within the time limit
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="limited" id="limited" />
+                  <Label htmlFor="limited" className="font-normal cursor-pointer">
+                    Limited Attempts - Achieve the best success rate with limited tries
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {settings.gameMode === "timed" && (
+              <div className="space-y-2">
+                <Label htmlFor="timed-duration">Time Limit (seconds)</Label>
+                <Input
+                  id="timed-duration"
+                  type="number"
+                  value={settings.timedModeDuration}
+                  onChange={(e) =>
+                    updateSettings({ timedModeDuration: parseInt(e.target.value) || 30 })
+                  }
+                  min="10"
+                  max="120"
+                />
+              </div>
+            )}
+
+            {settings.gameMode === "limited" && (
+              <div className="space-y-2">
+                <Label htmlFor="limited-attempts">Maximum Attempts</Label>
+                <Input
+                  id="limited-attempts"
+                  type="number"
+                  value={settings.limitedModeAttempts}
+                  onChange={(e) =>
+                    updateSettings({ limitedModeAttempts: parseInt(e.target.value) || 5 })
+                  }
+                  min="1"
+                  max="20"
+                />
+              </div>
+            )}
             
             <div className="space-y-3">
               <Label>Difficulty Level</Label>

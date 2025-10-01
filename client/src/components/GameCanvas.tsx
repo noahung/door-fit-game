@@ -101,6 +101,38 @@ export const GameCanvas: React.FC = () => {
     loadImages();
   }, [settings.houseImageUrl, settings.doorImageUrl]);
 
+  // Timer countdown for timed mode
+  useEffect(() => {
+    if (gamePhase !== "playing" || settings.gameMode !== "timed") return;
+    if (stats.timedModeTimeLeft === null || stats.timedModeTimeLeft <= 0) return;
+
+    const timerId = setInterval(() => {
+      useSlidingDoor.setState((state) => {
+        const newTimeLeft = (state.stats.timedModeTimeLeft ?? 0) - 1;
+        
+        if (newTimeLeft <= 0) {
+          // Time's up!
+          setTimeout(() => state.setGamePhase("failure"), 0);
+          return {
+            stats: {
+              ...state.stats,
+              timedModeTimeLeft: 0,
+            },
+          };
+        }
+        
+        return {
+          stats: {
+            ...state.stats,
+            timedModeTimeLeft: newTimeLeft,
+          },
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [gamePhase, settings.gameMode, stats.timedModeTimeLeft]);
+
   // Animation loop
   useEffect(() => {
     if (gamePhase !== "playing" || !imagesLoaded) return;
@@ -277,19 +309,83 @@ export const GameCanvas: React.FC = () => {
         console.log("Success! Door aligned correctly");
         playSuccess();
         recordSuccess();
-        setGamePhase("success");
         
-        // Redirect after a delay
-        if (settings.successRedirectUrl) {
+        // Check game mode behavior
+        if (settings.gameMode === "timed") {
+          // In timed mode, continue playing after success
           setTimeout(() => {
-            window.location.href = settings.successRedirectUrl;
-          }, 2000);
+            setDoorPosition(0);
+            setDoorDirection(1);
+            startAttempt();
+          }, 500);
+        } else if (settings.gameMode === "limited") {
+          // Check if we're out of attempts
+          const attemptsLeft = (stats.limitedModeAttemptsLeft ?? 0) - 1;
+          useSlidingDoor.setState((state) => ({
+            stats: {
+              ...state.stats,
+              limitedModeAttemptsLeft: attemptsLeft,
+            },
+          }));
+          
+          if (attemptsLeft <= 0) {
+            setGamePhase("success");
+          } else {
+            // Continue playing
+            setTimeout(() => {
+              setDoorPosition(0);
+              setDoorDirection(1);
+              startAttempt();
+            }, 500);
+          }
+        } else {
+          // Classic mode - stop on success
+          setGamePhase("success");
+          
+          // Redirect after a delay
+          if (settings.successRedirectUrl) {
+            setTimeout(() => {
+              window.location.href = settings.successRedirectUrl;
+            }, 2000);
+          }
         }
       } else {
         console.log("Failure! Door not aligned");
         playHit();
         recordFailure();
-        setGamePhase("failure");
+        
+        // Check game mode behavior
+        if (settings.gameMode === "timed") {
+          // In timed mode, continue playing after failure
+          setTimeout(() => {
+            setDoorPosition(0);
+            setDoorDirection(1);
+            startAttempt();
+          }, 500);
+        } else if (settings.gameMode === "limited") {
+          // Check if we're out of attempts
+          const attemptsLeft = (stats.limitedModeAttemptsLeft ?? 0) - 1;
+          useSlidingDoor.setState((state) => ({
+            stats: {
+              ...state.stats,
+              limitedModeAttemptsLeft: attemptsLeft,
+            },
+          }));
+          
+          if (attemptsLeft <= 0) {
+            setGamePhase("failure");
+          } else {
+            // Continue playing
+            setTimeout(() => {
+              setDoorPosition(0);
+              setDoorDirection(1);
+              startAttempt();
+            }, 500);
+          }
+        } else {
+          // Classic mode - stop on failure
+          setGamePhase("failure");
+        }
       }
     }
   };
@@ -300,6 +396,24 @@ export const GameCanvas: React.FC = () => {
     setDoorPosition(0);
     setDoorDirection(1);
     startAttempt();
+    
+    // Initialize game mode specific counters
+    if (settings.gameMode === "timed") {
+      useSlidingDoor.setState((state) => ({
+        stats: {
+          ...state.stats,
+          timedModeTimeLeft: settings.timedModeDuration,
+        },
+      }));
+    } else if (settings.gameMode === "limited") {
+      useSlidingDoor.setState((state) => ({
+        stats: {
+          ...state.stats,
+          limitedModeAttemptsLeft: settings.limitedModeAttempts,
+        },
+      }));
+    }
+    
     setGamePhase("playing");
   };
 
@@ -363,10 +477,30 @@ export const GameCanvas: React.FC = () => {
       </div>
       
       {gamePhase === "playing" && (
-        <div className="bg-blue-100 border border-blue-400 rounded px-4 py-3 text-center">
-          <p className="text-blue-800 font-semibold">
-            Click or tap to stop the door when it aligns with the green area!
-          </p>
+        <div className="space-y-2 w-full max-w-md">
+          <div className="bg-blue-100 border border-blue-400 rounded px-4 py-3 text-center">
+            <p className="text-blue-800 font-semibold">
+              Click or tap to stop the door when it aligns with the green area!
+            </p>
+          </div>
+          
+          {/* Timed Mode Timer */}
+          {settings.gameMode === "timed" && stats.timedModeTimeLeft !== null && (
+            <div className="bg-orange-100 border border-orange-400 rounded px-4 py-2 text-center">
+              <p className="text-orange-800 font-bold text-lg">
+                Time Left: {stats.timedModeTimeLeft}s
+              </p>
+            </div>
+          )}
+          
+          {/* Limited Mode Attempts */}
+          {settings.gameMode === "limited" && stats.limitedModeAttemptsLeft !== null && (
+            <div className="bg-purple-100 border border-purple-400 rounded px-4 py-2 text-center">
+              <p className="text-purple-800 font-bold text-lg">
+                Attempts Left: {stats.limitedModeAttemptsLeft}
+              </p>
+            </div>
+          )}
         </div>
       )}
       

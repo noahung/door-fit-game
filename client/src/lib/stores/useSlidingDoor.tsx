@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type DifficultyLevel = "easy" | "medium" | "hard";
+export type GameMode = "classic" | "timed" | "limited";
 
 export interface GameSettings {
   houseImageUrl: string | null;
@@ -18,6 +19,9 @@ export interface GameSettings {
   successRedirectUrl: string;
   successThreshold: number; // Percentage of overlap required for success (0-100)
   difficulty: DifficultyLevel;
+  gameMode: GameMode;
+  timedModeDuration: number; // seconds for timed mode
+  limitedModeAttempts: number; // max attempts for limited mode
 }
 
 export type GamePhase = "settings" | "ready" | "playing" | "success" | "failure";
@@ -27,6 +31,8 @@ interface GameStats {
   successes: number;
   bestTime: number | null; // in milliseconds
   currentStartTime: number | null;
+  timedModeTimeLeft: number | null; // seconds left in timed mode
+  limitedModeAttemptsLeft: number | null; // attempts left in limited mode
 }
 
 interface SlidingDoorState {
@@ -74,6 +80,9 @@ const defaultSettings: GameSettings = {
   successRedirectUrl: "",
   successThreshold: 80,
   difficulty: "medium",
+  gameMode: "classic",
+  timedModeDuration: 30,
+  limitedModeAttempts: 5,
 };
 
 // Helper function to convert file to base64
@@ -99,6 +108,8 @@ export const useSlidingDoor = create<SlidingDoorState>()(
         successes: 0,
         bestTime: null,
         currentStartTime: null,
+        timedModeTimeLeft: null,
+        limitedModeAttemptsLeft: null,
       },
 
       updateSettings: (newSettings) => {
@@ -190,6 +201,8 @@ export const useSlidingDoor = create<SlidingDoorState>()(
             successes: 0,
             bestTime: null,
             currentStartTime: null,
+            timedModeTimeLeft: null,
+            limitedModeAttemptsLeft: null,
           },
         });
         console.log("Stats reset");
