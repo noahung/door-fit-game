@@ -77,7 +77,7 @@ const defaultSettings: GameSettings = {
   successAreaWidth: 60,
   successAreaHeight: 80,
   doorSpeed: 5,
-  successRedirectUrl: "https://advertomedia.co.uk/contact-us",
+  successRedirectUrl: "", // Disabled for now - let users screenshot their success
   successThreshold: 90,
   difficulty: "hard",
   gameMode: "classic",

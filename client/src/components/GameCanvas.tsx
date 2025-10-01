@@ -524,19 +524,17 @@ export const GameCanvas: React.FC = () => {
         
         {gamePhase === "success" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#f47421] bg-opacity-90 rounded-2xl p-4">
-            <div className="text-white text-2xl sm:text-4xl font-bold mb-2 sm:mb-4">SUCCESS!</div>
-            <div className="text-white text-lg sm:text-xl mb-2 sm:mb-4">Perfect alignment!</div>
-            {settings.successRedirectUrl && (
-              <div className="text-white text-sm">Redirecting...</div>
-            )}
-            {!settings.successRedirectUrl && (
-              <Button 
-                onClick={resetGame} 
-                className="mt-2 sm:mt-4 bg-white hover:bg-gray-100 text-[#f47421] font-bold px-4 py-2 sm:px-6 sm:py-2 rounded-xl border-2 border-white shadow-lg transition-all duration-200"
-              >
-                🎮 Play Again
-              </Button>
-            )}
+            <div className="text-white text-3xl sm:text-5xl font-bold mb-2 sm:mb-4">🎉 SUCCESS! 🎉</div>
+            <div className="text-white text-lg sm:text-2xl font-semibold mb-2 sm:mb-4">Perfect alignment!</div>
+            <div className="text-white text-base sm:text-lg mb-4 sm:mb-6 text-center px-4">
+              📸 Take a screenshot and show off your skills!
+            </div>
+            <Button 
+              onClick={resetGame} 
+              className="mt-2 sm:mt-4 bg-white hover:bg-gray-100 text-[#f47421] font-bold px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg rounded-xl border-2 border-white shadow-lg transition-all duration-200 transform hover:scale-105"
+            >
+              🎮 Play Again
+            </Button>
           </div>
         )}
         
