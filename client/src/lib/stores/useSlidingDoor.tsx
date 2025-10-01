@@ -77,7 +77,7 @@ const defaultSettings: GameSettings = {
   successAreaWidth: 60,
   successAreaHeight: 80,
   doorSpeed: 5,
-  successRedirectUrl: "https://ausirehomes.co.uk/contact-us",
+  successRedirectUrl: "https://advertomedia.co.uk/contact-us",
   successThreshold: 90,
   difficulty: "hard",
   gameMode: "classic",
